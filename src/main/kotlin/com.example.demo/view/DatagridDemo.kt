@@ -4,7 +4,6 @@ import tornadofx.*;
 
 class DatagridDemo: View("Datagrid Demo") {
 
-    val pad = 60.0;
     private val home = pane() {
         val background = rectangle {
             x = 0.0;
@@ -42,6 +41,7 @@ class DatagridDemo: View("Datagrid Demo") {
         add(background);
         add(body);
         add(roof);
+        add(door);
     }
 
     //set the root of the view to the welcomeScreen
