@@ -2,6 +2,7 @@ package app.ui.userCreation
 
 import app.ui.styles.ButtonStyles
 import app.ui.userCreation.ViewModel.UserCreationViewModel
+import app.ui.welcomeScreen.View.WelcomeScreen
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Pos
@@ -9,8 +10,6 @@ import javafx.scene.effect.DropShadow
 import javafx.scene.paint.Color
 import tornadofx.*
 import app.ui.widgets.recordButton.RecordButton
-import app.ui.welcomeScreen.*
-import com.github.thomasnield.rxkotlinfx.actionEvents
 import javafx.application.Platform
 import java.util.*
 import kotlin.concurrent.timerTask

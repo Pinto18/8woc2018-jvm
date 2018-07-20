@@ -1,6 +1,6 @@
 package app
 
-import app.ui.welcomeScreen.*
+import app.ui.welcomeScreen.View.WelcomeScreen
 import tornadofx.*;
 
 //Put the view you want before the double colon

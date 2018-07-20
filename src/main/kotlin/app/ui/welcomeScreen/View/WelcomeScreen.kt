@@ -1,4 +1,4 @@
-package app.ui.welcomeScreen
+package app.ui.welcomeScreen.View
 import app.ui.styles.ButtonStyles
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
