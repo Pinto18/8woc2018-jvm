@@ -46,6 +46,7 @@ dependencies {
     compile 'de.jensd:fontawesomefx-icons525:4.2.0-9.1.2-jpms'
     implementation 'com.github.WycliffeAssociates:jdenticon-kotlin:-SNAPSHOT'
     implementation 'com.github.afester.FranzXaver:Examples:0.1'
+    implementation 'com.github.WycliffeAssociates:8woc2018-common:temp-dev-SNAPSHOT' //for User data class
     compile "com.github.thomasnield:rxkotlinfx:2.2.2" // optional
     compile 'com.jfoenix:jfoenix:8.0.5' // Java 8
 
