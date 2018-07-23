@@ -26,18 +26,18 @@ class DirectoryProvider(private val appName: String) {
     }
 
     // create a directory to store the user's application projects/documents
-    fun getUserDataDirectory(appendedPath: String = "", createIfNotExists: Boolean = true) : String {
+    fun getUserDataDirectory(appendedPath: String = "") : String {
         // create the directory if it does not exist
         var pathString = System.getProperty("user.home") + separator + appName
         if (appendedPath.isNotEmpty()) pathString += separator + appendedPath
-        if (createIfNotExists && !makeDirectories(pathString)) {
+        if (!makeDirectories(pathString)) {
             return ""
         }
         return pathString
     }
 
     // create a directory to store the application's private data
-    fun getAppDataDirectory(appendedPath: String = "", createIfNotExists: Boolean = true) : String {
+    fun getAppDataDirectory(appendedPath: String = "") : String {
         // convert to upper case
         val os: String = System.getProperty("os.name")
 
@@ -62,7 +62,7 @@ class DirectoryProvider(private val appName: String) {
             return ""
         }
         // create the directory if it does not exist
-        if (createIfNotExists && !makeDirectories(pathString)) {
+        if (!makeDirectories(pathString)) {
             return ""
         }
 
