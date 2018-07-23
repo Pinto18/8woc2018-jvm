@@ -1,64 +1,52 @@
+import audacity.Take
 import java.io.File
 import java.io.Reader
 import java.io.InputStreamReader
 import java.io.BufferedReader
+import java.util.*
 
 
 fun main(args:Array<String>) {
+
     val os = System.getProperty("os.name").toUpperCase() //current user's OS
 
-    var path: String //path to Downloads directory
+    val locale = Locale.getDefault()
 
-    //temporarily hard coded; currently must be a non-empty file to avoid invalid/corruption error in Audacity
-    var filename = "take1.wav"
+    val labels= ResourceBundle.getBundle("Resources", locale) //accesses the properties file for the current project
 
-    //temporarily hard coded for Audacity
-    var program = "audacity"
+    val program = labels.getString("Ext_Recording_Application_Name") //gets the external recording application name
 
-    //find the path to the Downloads directory
-    
-    if (os.contains("WIN") || os.contains("MAC")){
-        path = System.getProperty("user.home")+ "${File.separator}Downloads"
-    }
-    else { //Linux OS
-        path = System.getProperty("user.home")
-    }
+    //create the take recording file (tests AudioStore class functions)
+    val take = Take("en", "ot", "gen", "01", "01", "02")
+    val take_recording_file = take.createFile()
 
-   println("File is in ${path}")
 
-    //create and record the take file
+    //open the specified external application record the take file
     try {
-        val take = File(path + "/${filename}")
-        take.createNewFile() //make a new wav file for the take in Downloads
-        println("Opening audacity")
+        println("Opening $program")
 
         //open Audacity (must be installed on the user's computer)
         try{
             //determines and executes the appropriate command to open Audacity
             if (os.contains("WIN")){
                 //need to fix: Windows does not recognize start command for external apps
-                val process = ProcessBuilder("start", "${program}", "${path}/${filename}")
-                process.start()
+                val process = Runtime.getRuntime().exec("start $program $take_recording_file.absolutePath")
             }
             else if (os.contains("MAC")){
-                val process = ProcessBuilder("open", "-a", "${program}", "${path}/${filename}")
-                process.start()
+                val process = Runtime.getRuntime().exec("open -a $program $take_recording_file.absolutePath")
             }
             else { //Linux OS
-                val process = ProcessBuilder("${program}", "${path}/${filename}")
-                process.start()
+                val process = Runtime.getRuntime().exec("$program $take_recording_file.absolutePath")
             }
-
             //calls helper function to get the current status of Audacity
             var status = getCurrStatus(os, true)
             while(status == 1){
                 status = getCurrStatus(os, false)
             }
             println("User has closed the program")
-
         }
         catch (e:Exception) {
-            println("Error getting status of ${program}")
+            println("Error getting status of $program")
             e.printStackTrace()
         }
     }
@@ -69,7 +57,7 @@ fun main(args:Array<String>) {
 }
 
 
-
+//gets the current status of Audacity on the user's system
 fun getCurrStatus(os: String, first: Boolean):Int{
     val status_file: String
 
@@ -97,29 +85,23 @@ fun getCurrStatus(os: String, first: Boolean):Int{
     var s = stdin.readLine()
 
     while(s != null){
-       if (!s.contains("grep Audacity.app")){
+        if (!s.contains("grep Audacity.app")){
             prcs = 1
-       }
-       s = stdin.readLine()
+        }
+        s = stdin.readLine()
     }
-        
-     if (os.contains("MAC")){
+
+    if (os.contains("MAC")){
         if (!first){
-            //return the status 
+            //return the status
             return prcs
         }
         return 1
-     }
-     else{
-         //return the status
-         return prcs
-     }
+    }
+    else{
+        //return the status
+        return prcs
+    }
 }
-
-
-
-
-
-
 
 
