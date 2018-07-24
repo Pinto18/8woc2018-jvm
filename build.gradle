@@ -9,18 +9,22 @@ buildscript {
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath group: 'org.jooq', name: 'jooq-meta-extensions', version: '3.11.2'
+        classpath 'org.jooq:jooq-codegen:3.11.2'
+        classpath 'org.xerial:sqlite-jdbc:3.7.2'
     }
 }
 
 plugins {
     id 'java'
+    id 'nu.studer.jooq' version '3.0.1'
 }
 
 group 'org.wycliffeassociates.translationrecorder'
 
 
 apply plugin: 'kotlin'
-apply plugin: 'kotlin-kapt'
+//apply plugin: 'kotlin-kapt'
 
 sourceCompatibility = 1.8
 
@@ -37,13 +41,14 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     compile group: 'org.xerial', name: 'sqlite-jdbc', version: "$sqlite_jdbc"
     compile "io.reactivex.rxjava2:rxkotlin:$rxkotlin_version"
-    compile "io.requery:requery:$requery_version"
-    compile "io.requery:requery-kotlin:$requery_version"
-    compile 'com.google.dagger:dagger:2.16'
-    kapt 'com.google.dagger:dagger-compiler:2.16'
+    compile 'org.jooq:jooq:3.11.2'
+    compile 'org.xerial:sqlite-jdbc:3.7.2'
+//    compile 'com.google.dagger:dagger:2.16'
+    jooqRuntime 'org.xerial:sqlite-jdbc:3.7.2'
+    jooqRuntime group: 'org.jooq', name: 'jooq-meta-extensions', version: '3.11.2'
+//    kapt 'com.google.dagger:dagger-compiler:2.16'
     testCompile "org.mockito:mockito-core:2.+"
     implementation 'com.github.WycliffeAssociates:8woc2018-common:user-pref-SNAPSHOT'
-    kapt "io.requery:requery-processor:$requery_version"
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 
@@ -56,4 +61,30 @@ compileTestKotlin {
 
 configurations.all {
     resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
+jooq{
+    version = '3.11.2'
+    edition = 'OSS'
+    sample(sourceSets.main) {
+        jdbc {
+            driver = 'org.sqlite.JDBC'
+            url = 'jdbc:sqlite:test.db'
+        }
+        generator {
+            database {
+                name = 'org.jooq.meta.sqlite.SQLiteDatabase'
+            }
+            generate {
+                pojos = true
+                daos = true
+                relations = true
+            }
+
+            target {
+                packageName = 'persistence'
+                directory = 'src/main/java'
+            }
+        }
+    }
 }

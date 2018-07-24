@@ -1,28 +1,31 @@
 package persistence.mapping
 
 import data.Language
-import persistence.model.ILanguageEntity
-import persistence.model.LanguageEntity
-import javax.inject.Inject
+import data.mapping.Mapper
+import persistence.tables.pojos.Languageentity
 
-class LanguageMapper @Inject constructor(): Mapper<ILanguageEntity, Language>{
-    override fun mapFromEntity(type: ILanguageEntity): Language {
+//import javax.inject.Inject
+
+class LanguageMapper /*@Inject*/ constructor(): Mapper<Languageentity, Language> {
+    override fun mapFromEntity(type: Languageentity): Language {
         return Language(
                 type.id,
                 type.slug,
                 type.name,
-                type.canBeSource,
-                type.anglicizedName
+                type.canbesource == 0,
+                type.anglicizedname
         )
     }
 
-    override fun mapToEntity(type: Language): ILanguageEntity {
-        val languageEntity = LanguageEntity()
-        languageEntity.id = type.id
-        languageEntity.setName(type.name)
-        languageEntity.setSlug(type.slug)
-        languageEntity.setCanBeSource(type.canBeSource)
-        languageEntity.setAnglicizedName(type.anglicizedName)
+    override fun mapToEntity(type: Language): Languageentity {
+        val languageEntity = Languageentity()
+        if (type.id  != 0){
+            languageEntity.id = type.id
+        }
+        languageEntity.slug = type.slug
+        languageEntity.name = type.name
+        languageEntity.canbesource = if(type.canBeSource) 0 else 1
+        languageEntity.anglicizedname = type.anglicizedName
         return languageEntity
     }
 

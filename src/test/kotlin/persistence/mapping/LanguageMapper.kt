@@ -3,7 +3,7 @@ package persistence.mapping
 import data.Language
 import org.junit.Assert
 import org.junit.Test
-import persistence.model.LanguageEntity
+import persistence.tables.pojos.Languageentity
 import java.util.*
 
 class LanguageMapperTest {
@@ -26,19 +26,20 @@ class LanguageMapperTest {
     @Test
     fun testIfLanguageEntityCorrectlyMappedToLanguage() {
         for (testCase in LANGUAGE_TABLE) {
-            val input = LanguageEntity()
-            input.id = Random().nextInt()
-            input.setName(testCase["name"])
-            input.setSlug(testCase["slug"])
-            input.setAnglicizedName(testCase["anglicizedName"])
-            input.setCanBeSource(testCase["canBeSource"] == "true")
+            val input = Languageentity(
+                    Random().nextInt(),
+                    testCase["name"],
+                    testCase["slug"],
+                    0,
+                    testCase["anglicizedName"]
+            )
 
             val expected = Language(
                     id = input.id,
                     slug = input.slug,
                     name = input.name,
-                    anglicizedName = input.anglicizedName,
-                    canBeSource = input.canBeSource
+                    anglicizedName = input.anglicizedname,
+                    canBeSource = input.canbesource == 0
             )
 
             val result = LanguageMapper().mapFromEntity(input)
@@ -63,13 +64,13 @@ class LanguageMapperTest {
                     canBeSource = testCase["canBeSource"] == "true"
             )
 
-            val expected = LanguageEntity()
-            expected.id = input.id
-            expected.setName(input.name)
-            expected.setSlug(input.slug)
-            expected.setAnglicizedName(input.anglicizedName)
-            expected.setCanBeSource(input.canBeSource)
-
+            val expected = Languageentity(
+                    input.id,
+                    input.slug,
+                    input.name,
+                    if(input.canBeSource) 0 else 1,
+                    input.anglicizedName
+            )
             val result = LanguageMapper().mapToEntity(input)
             try {
                 Assert.assertEquals(expected, result)

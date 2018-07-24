@@ -1,63 +1,67 @@
 package persistence.repo
 
 import data.Language
-import io.requery.Persistable
-import io.requery.kotlin.eq
-import io.requery.sql.KotlinConfiguration
-import io.requery.sql.KotlinEntityDataStore
-import io.requery.sql.SchemaModifier
-import io.requery.sql.TableCreationMode
+import org.jooq.SQLDialect
+import org.jooq.impl.DSL
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.sqlite.SQLiteDataSource
 import persistence.data.LanguageStore
 import persistence.mapping.LanguageMapper
-import persistence.model.*
+import persistence.tables.daos.LanguageentityDao
+import persistence.tables.pojos.Userentity
+import java.io.File
 import java.util.*
 
 class LanguageRepoTest {
     private lateinit var languageRepo: LanguageRepo
-    private lateinit var dataStore: KotlinEntityDataStore<Persistable>
 
     @Before
     fun setup(){
         val dataSource = SQLiteDataSource()
         dataSource.url = "jdbc:sqlite:test.db"
 
-        // creates tables that do not already exist
-        SchemaModifier(dataSource, Models.DEFAULT).createTables(TableCreationMode.DROP_CREATE)
-        // sets up data store
-        val config = KotlinConfiguration(dataSource = dataSource, model = Models.DEFAULT)
-        dataStore = KotlinEntityDataStore<Persistable>(config)
-
-        languageRepo = LanguageRepo(dataStore, LanguageMapper())
+        val sqlSchema = File("src\\main\\resources\\databaseInit.sql")
+        val config = DSL.using(dataSource.connection, SQLDialect.SQLITE).configuration()
+        val sb = StringBuilder()
+        sqlSchema.forEachLine {
+            sb.append(it)
+            if(it.contains(';')){
+                config.dsl().fetch(sb.toString())
+                sb.delete(0, sb.length)
+            }
+        }
+        languageRepo = LanguageRepo(LanguageentityDao(config), LanguageMapper())
     }
 
     @Test
     fun insertAndRetrieveByIdTest(){
         LanguageStore.languages.forEach {
+            it.id = 0
             it.id = languageRepo.insert(it).blockingFirst()
-            languageRepo.getById(it.id).test().assertValue(it)
+            Assert.assertEquals(it,languageRepo.getById(it.id).blockingFirst())
         }
     }
 
     @Test
     fun retrieveAllTest(){
         LanguageStore.languages.forEach {
+            it.id = 0
             it.id = languageRepo.insert(it).blockingFirst()
         }
-        languageRepo.getAll().test().assertValue(LanguageStore.languages)
+        Assert.assertEquals(LanguageStore.languages, languageRepo.getAll().blockingFirst())
     }
 
     @Test
     fun retrieveSourceLanguagesTest(){
         LanguageStore.languages.forEach {
+            it.id = 0
             it.id = languageRepo.insert(it).blockingFirst()
         }
-        languageRepo.getSourceLanguages().test().assertValue( LanguageStore.languages.filter {
+        Assert.assertEquals(LanguageStore.languages.filter {
             it.canBeSource
-        })
+        }, languageRepo.getSourceLanguages().blockingFirst())
     }
 
     @Test
@@ -76,37 +80,11 @@ class LanguageRepoTest {
             updatedLanguage.id = it.id
 
             // try to update the language in the repo
-            languageRepo.update(updatedLanguage).test().assertComplete()
-            languageRepo.getById(updatedLanguage.id).test().assertValue(updatedLanguage)
+            languageRepo.update(updatedLanguage)
+            val actual = languageRepo.getById(updatedLanguage.id).blockingFirst()
+            Assert.assertEquals(it, actual)
             // roll back the tests for the next case
-            languageRepo.update(it).test().assertComplete()
-        }
-    }
-
-    @Test
-    fun deleteTest() {
-        val testUser = UserEntity()
-        testUser.setAudioPath("somepath")
-        testUser.setAudioHash("12345678")
-        testUser.id = dataStore.insert(testUser).id
-
-        LanguageStore.languages.forEach {
-            it.id = languageRepo.insert(it).blockingFirst()
-
-            val testUserLanguage = UserLanguage()
-            testUserLanguage.setLanguageEntityid(it.id)
-            testUserLanguage.setUserEntityid(testUser.id)
-
-            dataStore.insert(testUserLanguage)
-
-            languageRepo.delete(it).test().assertComplete()
-            try {
-                Assert.assertTrue(dataStore.select(IUserLanguage::class).where(IUserLanguage::languageEntityid eq it.id).get().toList().isEmpty())
-            } catch (e: AssertionError) {
-                println("Failed on")
-                println(it.slug)
-                throw e
-            }
+            languageRepo.update(it)
         }
     }
 }
