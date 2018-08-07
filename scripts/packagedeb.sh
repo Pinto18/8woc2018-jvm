@@ -3,6 +3,7 @@
 #setup parameters
 PACKAGE_NAME="translation-recorder"
 PACKAGE_VERSION="0.0"
+PACKAGE_STAGE="UNRELEASED"
 SOURCE_DIR=$PWD
 TEMP_DIR="/tmp"
 
@@ -23,12 +24,19 @@ cp debian/translation-recorder.desktop $TEMP_DIR/debian/usr/share/applications/
 cp debian/copyright $TEMP_DIR/debian/usr/share/doc/$PACKAGE_NAME/
 cp -r ../build/libs $TEMP_DIR/debian/lib/$PACKAGE_NAME
 
+#build changelog file
+echo "$PACKAGE_NAME ($PACKAGE_VERSION) $PACKAGE_STAGE; urgency=low" > $TEMP_DIR/debian/lib/$PACKAGE_NAME/changelog
+echo "* Intitial Release." >> $TEMP_DIR/debian/lib/$PACKAGE_NAME/changelog
+echo "* This is my first Debian package." >> $TEMP_DIR/debian/lib/$PACKAGE_NAME/changelog
+echo "-- Nicholas DiPinto <no-reply@nothing.com> Fri, 3 Aug 2018 14:43:31 +0400" >> $TEMP_DIR/debian/lib/$PACKAGE_NAME/changelog
+
 #compress the changelog file and place in the doc section of the package
-gzip -9c $TEMP_DIR/debian/lib/$PACKAGE_NAME/NEWS > $TEMP_DIR/debian/usr/share/doc/$PACKAGE_NAME/changelog.gz
+gzip -9c $TEMP_DIR/debian/lib/$PACKAGE_NAME/changelog > $TEMP_DIR/debian/usr/share/doc/$PACKAGE_NAME/changelog.gz
 
 #move the svg icon to its proper location and give it the correct permissions as enforced by Debian
-mv $TEMP_DIR/debian/lib/$PACKAGE_NAME/resources/translation-recorder.svg $TEMP_DIR/debian/usr/share/doc/$PACKAGE_NAME/
-chmod 644 $TEMP_DIR/debian/usr/share/doc/$PACKAGE_NAME/translation-recorder.svg
+cp ../icons/translation-recorder.png$TEMP_DIR/debian/lib/$PACKAGE_NAME/resources/
+mv $TEMP_DIR/debian/lib/$PACKAGE_NAME/resources/translation-recorder.png $TEMP_DIR/debian/usr/share/doc/$PACKAGE_NAME/
+chmod 644 $TEMP_DIR/debian/usr/share/doc/$PACKAGE_NAME/translation-recorder.png
 
 #remove unnecessary files
 rm -r $TEMP_DIR/debian/lib/$PACKAGE_NAME/debian
