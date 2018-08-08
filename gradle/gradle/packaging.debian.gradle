@@ -1,0 +1,69 @@
+project.ext{
+    debianDistribution = (applicationRelease) ? "release" : "snapshot"
+    debianVersionExtension = ("snapshot".equals(debianDistribution)) ? "~${applicationVersionDebian}" : ""
+    debianApplicationVersionFull = "${applicationVersionFull}".replaceAll("-", ".") + debianVersionExtension
+}
+
+task debianClean(type: Delete) {
+    delete 'build/debian'
+}
+
+task debianManPages(dependsOn: installDist) {
+    doLast {
+        rootProject.file("build/debian/8woc2018-jvm").mkdirs()
+
+        FileTree tree = fileTree(rootProject.file("gradle/debian"))
+        tree.each {
+            println it.name
+        }
+        exec {
+            workingDir rootProject.file("gradle/debian")
+            commandLine "./makemanpages.sh"
+        }
+    }
+}
+
+task debianPrepare(dependsOn: [debianClean, installDist, debianManPages]) {
+    doLast {
+        copy {
+            from rootProject.files("build/install/8woc2018-jvm")
+            into rootProject.file("build/debian/8woc2018-jvm")
+            exlcude("**/*.bat")
+        }
+
+        copy {
+            from rootProject.files("gradle/debian/debian-core")
+            into rootProject.files("build/debian/8woc2018-jvm/debian")
+        }
+
+        //This block of code is commented out b/c the file it copies is a bash script that enables a TAB auto-complete
+        //feature for the program being installed. Not much is understood yet of the syntax used in the bash script
+        //of the example so it is being commented out until more is understood.
+//        copy {
+//            from rootProject.files("gradle/bash/8woc2018-jvm.bash-completion")
+//            into rootProject.file("build/debian/8woc2018-jvm/debian")
+//        }
+
+        exec {
+            workingDir rootproject.file("gradle/debian")
+            commandLine "./makechangelog.pl", "8woc2018-jvm", "${debianDistribution}", "${debianApplicationVersionFull}", "../../CHANGELOG.md", "../../build/debian/8woc2018-jvm/debian/changelog"
+        }
+    }
+}
+
+task debian(dependsOn: debianPrepare){
+    doLast{
+        exec{
+            workingDir rootProject.file("${buildDir}/debian/8woc2018-jvm")
+            commandLine "debuild -i -us -uc -b".split()
+        }
+
+        if(!project.ext.has('debDontCopyToUpload')){
+            copy{
+                from rootproject.files("${buildDir}/debian")
+                include "*.deb"
+                into rootProject.file("${buildDir}/upload")
+            }
+        }
+    }
+}

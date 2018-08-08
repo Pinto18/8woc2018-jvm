@@ -1,0 +1,15 @@
+Source: translation recorder
+Section: x11
+Priority: extra
+Maintainer: Team <user@example.com>
+Build-Depends: debhelper (>= 8.0.0) | openjdk-8-jre-headless
+Standards-Version: 3.9.4
+Homepage: https://github.com/WycliffeAssoicates/8woc2018-jvm
+
+Package: translation-recorder
+Architecture: all
+Depends: ${misc:Depends}, openjdk-8-jre-headless
+Homepage: https://github.com/WycliffeAssociates/8woc2018-jvm
+Description: Recording software for creating oral translations of the Bible.
+ Translation Recorder allows users to create recordings of Bible translations on their machine
+ and stitch recordings together into either a full chapter, book, etc. later for open distribution.

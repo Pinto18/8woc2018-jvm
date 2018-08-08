@@ -1,0 +1,41 @@
+import java.text.SimpleDateFormat
+
+rootProject.ext.execAndGetOutput = { String command ->
+    try {
+        def stdout = new ByteArrayOutputStream()
+
+        exec {
+            workingDir rootProject.projectDir
+            commandLine command.split()
+            standardOutput = stdout
+        }
+
+        return stdout.toString().trim()
+    }
+    catch(Exception  e){
+        e.printStackTrace()
+        return null
+    }
+}
+
+rootProject.ext.asUTC = {Date date, String format ->
+    def snapshotDateFormat = new SimpleDateFormat()
+    snapshotDateFormat.setTimeZone(TimeZone.getTimeZone('UTC'))
+
+    return snapshotDateFormat.format(date)
+}
+
+rootProject.ext.getRevision = {
+    String currentCommit = execAndGetOutput("git rev-parse --short HEAD")
+    return (currentCommit !=null) ? currentCommit : "UNKNOWN"
+}
+
+rootProject.ext.isApplicationRelease = {
+    String currentBranches = execAndGetOutput("git log -n 1 --pretty=%d HEAD")
+    return (currentBranches != null) ? currentBranches.contains("master") : false
+}
+
+rootProject.ext.getVersionName = {
+    String currentVersion = execAndGetOutput("git describe --tags")
+    return currentVersion
+}
