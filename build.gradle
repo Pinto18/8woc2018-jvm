@@ -11,7 +11,7 @@ buildscript {
     ext.jfoenix_version = '8.0.4'
     ext.requery_version = '1.5.1'
     ext.sqlite_jdbc = '3.7.2'
-    ext.sqlDirPath = "src" + File.separator + "main" + File.separator + "Resources" + File.separator + "TestAppDbInit.sql"
+    ext.sqlDirPath = "${projectDir}" + File.separator + "src" + File.separator + "main" + File.separator + "resources" + File.separator + "TestAppDbInit.sql"
 
     ext.applicationVersion = getVersionName()
     ext.applicationVersionDebian = "1";
@@ -142,6 +142,7 @@ task createDb {
    // def driverName = 'org.sqlite.JDBC'
    // Class.forName(driverName)
     def sql = Sql.newInstance('jdbc:sqlite:test.sqlite', "org.sqlite.JDBC")
+    println new File(".").getAbsolutePath()
     String[] text = new File(sqlDirPath).text.split(';')
     text.collect { it.trim() }.findAll { !it.isEmpty() && !it.startsWith("--") }.each {
         sql = Sql.newInstance('jdbc:sqlite:test.sqlite', "org.sqlite.JDBC")
